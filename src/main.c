@@ -11,9 +11,9 @@
 const char* username = "rajago11";
 
 // When testing basic TX/RX
-#define STEP2
+// #define STEP2
 // When connecting UART to printf(), fgets()
-// #define STEP3
+#define STEP3
 // When testing UART IRQ for buffering
 // #define STEP4
 // When testing PCS
@@ -84,7 +84,9 @@ int _read(__unused int handle, char *buffer, int length) {
             continue;
         }
 
-        buffer[count++] = (char)ch;
+    // Echo the received character so the user sees what they type
+    uart_putc_raw(uart0, ch);
+    buffer[count++] = (char)ch;
         return count;
     }
     return count;
@@ -119,9 +121,13 @@ int main()
     // insert any setbuf lines below...
     setbuf(stdout, NULL);  // Disable buffering for stdout
     setbuf(stdin, NULL);   // Disable buffering for stdin
-
+    char name[8];
+    int age = 0;
     for(;;) {
-        putchar(getchar()); 
+        printf("Enter your name and age: ");
+        scanf("%s %d", name, &age);
+        printf("Hello, %s! You are %d years old.\n", name, age);
+        sleep_ms(100);  // in case the output loops and is too fast
     }
 }
 #endif
