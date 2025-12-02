@@ -45,8 +45,8 @@ public:
     static constexpr uint32_t DATA_MASK = M_R1|M_G1|M_B1|M_R2|M_G2|M_B2;
 
     // Refresh tuning
-    static constexpr int BITPLANES = 6;
-    static constexpr int DWELL_SCALE = 8;
+    static constexpr int BITPLANES = 5; // fewer planes -> faster refresh
+    static constexpr int DWELL_SCALE = 4; // smaller dwell -> faster refresh
 
     // framebuffer
     uint8_t fb[32][32][3];
@@ -72,6 +72,7 @@ struct Brick {
 // BrickBreaker class
 class BrickBreaker {
 public:
+    enum Difficulty { EASY = 0, MEDIUM = 1, HARD = 2 };
     static constexpr int WIDTH = 32;
     static constexpr int HEIGHT = 32;
 
@@ -98,8 +99,11 @@ public:
     // Score / level
     int score;
     int level;
+    Difficulty difficulty;
+    float speed_scale; // multiplier applied to base ball speed
 
     BrickBreaker(Hub75Matrix &matrix);
+    void set_difficulty(Difficulty d);
     void init_bricks_for_level();
     void reset();
     void move_paddle_left();

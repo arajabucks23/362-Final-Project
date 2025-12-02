@@ -96,7 +96,20 @@ BrickBreaker::BrickBreaker(Hub75Matrix &matrix) : m(matrix) {
 
     score = 0;
     level = 1;
+    difficulty = EASY;
+    speed_scale = 1.0f; // default to easy -> will be adjusted by set_difficulty
     init_bricks_for_level();
+    reset();
+}
+
+void BrickBreaker::set_difficulty(Difficulty d) {
+    difficulty = d;
+    switch (d) {
+        case EASY: speed_scale = 0.5f; break;
+        case MEDIUM: speed_scale = 1.0f; break;
+        case HARD: speed_scale = 1.8f; break;
+    }
+    // apply immediately by resetting ball/paddle to new speed
     reset();
 }
 
@@ -125,8 +138,11 @@ void BrickBreaker::reset() {
     paddle_x = (WIDTH - paddle_w) / 2;
     ball_x = paddle_x + (paddle_w - 2) / 2;
     ball_y = paddle_y - 3;
-    ball_vx = 0.9f;
-    ball_vy = -1.2f;
+    // base velocities scaled by difficulty (increased to make differences clearer)
+    float base_vx = 1.0f;
+    float base_vy = -1.4f;
+    ball_vx = base_vx * speed_scale;
+    ball_vy = base_vy * speed_scale;
 }
 
 void BrickBreaker::move_paddle_left() {
