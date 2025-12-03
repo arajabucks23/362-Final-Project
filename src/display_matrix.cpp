@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cmath>
+#include "audio.h"
 
 // Keypad GPIO mapping - UPDATE these to match your wiring
 // Columns: outputs; Rows: inputs
@@ -339,6 +340,9 @@ int main() {
     Hub75Matrix matrix;
     BrickBreaker game(matrix);
 
+    // Play game-start sound
+    sfx_game_start();
+
     const uint32_t physics_interval_ms = 40; // ~25Hz
     uint32_t last_physics = to_ms_since_boot(get_absolute_time());
 
@@ -369,6 +373,8 @@ int main() {
     const float JOY_DEADZONE = 0.08f; // ~8% deadzone
 
     while (true) {
+        // update audio playback (non-blocking)
+        audio_update();
         game.render();
         matrix.refresh_once();
 

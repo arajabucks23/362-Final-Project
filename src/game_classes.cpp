@@ -1,4 +1,5 @@
 #include "game_classes.h"
+#include "audio.h"
 #include <cstring>
 
 // Hub75Matrix implementations
@@ -161,6 +162,8 @@ void BrickBreaker::reset_game() {
 
 void BrickBreaker::mark_level_cleared() {
     level_cleared = true;
+    // Play win sound: combined start melody + sweep
+    sfx_win();
 }
 
 void BrickBreaker::advance_level() {
@@ -181,9 +184,9 @@ void BrickBreaker::update_physics() {
     float next_x = ball_x + ball_vx;
     float next_y = ball_y + ball_vy;
 
-    if (next_x < 0) { next_x = 0; ball_vx = -ball_vx; }
-    if (next_x + 2 > WIDTH) { next_x = WIDTH - 2; ball_vx = -ball_vx; }
-    if (next_y < 0) { next_y = 0; ball_vy = -ball_vy; }
+    if (next_x < 0) { next_x = 0; ball_vx = -ball_vx; sfx_wall_bounce(); }
+    if (next_x + 2 > WIDTH) { next_x = WIDTH - 2; ball_vx = -ball_vx; sfx_wall_bounce(); }
+    if (next_y < 0) { next_y = 0; ball_vy = -ball_vy; sfx_wall_bounce(); }
 
     int ball_left = (int)next_x;
     int ball_right = (int)next_x + 1;
@@ -218,6 +221,7 @@ void BrickBreaker::update_physics() {
             if (bricks[i].alive) {
                 score += level * 50;
                 lcd_print_score(score, level);
+                sfx_brick_hit();
             }
             bricks[i].hit();
             ball_vy = -ball_vy;
@@ -243,6 +247,7 @@ void BrickBreaker::update_physics() {
            if (lives <= 0) {
                // game over: stop updating ball/paddle until reset
                game_over = true;
+               sfx_game_over();
                return;
            } else {
                // reset ball/paddle but keep current bricks and level
