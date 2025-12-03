@@ -99,6 +99,9 @@ public:
     // Score / level
     int score;
     int level;
+    int lives;
+    bool game_over;
+    bool level_cleared;
     Difficulty difficulty;
     float speed_scale; // multiplier applied to base ball speed
 
@@ -106,6 +109,11 @@ public:
     void set_difficulty(Difficulty d);
     void init_bricks_for_level();
     void reset();
+    void reset_game();
+    void mark_level_cleared();
+    void advance_level();
+    bool is_level_cleared() const { return level_cleared; }
+    bool is_game_over() const { return game_over; }
     void move_paddle_left();
     void move_paddle_right();
     void update_physics();

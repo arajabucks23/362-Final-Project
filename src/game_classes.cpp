@@ -96,6 +96,9 @@ BrickBreaker::BrickBreaker(Hub75Matrix &matrix) : m(matrix) {
 
     score = 0;
     level = 1;
+    lives = 3;
+    game_over = false;
+    level_cleared = false;
     difficulty = EASY;
     speed_scale = 1.0f; // default to easy -> will be adjusted by set_difficulty
     init_bricks_for_level();
@@ -143,6 +146,28 @@ void BrickBreaker::reset() {
     float base_vy = -1.4f;
     ball_vx = base_vx * speed_scale;
     ball_vy = base_vy * speed_scale;
+}
+
+void BrickBreaker::reset_game() {
+    score = 0;
+    level = 1;
+    lives = 3;
+    game_over = false;
+    level_cleared = false;
+    set_difficulty(difficulty); // reapply speed_scale and reset ball/paddle
+    init_bricks_for_level();
+    reset();
+}
+
+void BrickBreaker::mark_level_cleared() {
+    level_cleared = true;
+}
+
+void BrickBreaker::advance_level() {
+    level_cleared = false;
+    level++;
+    init_bricks_for_level();
+    reset();
 }
 
 void BrickBreaker::move_paddle_left() {
@@ -200,10 +225,8 @@ void BrickBreaker::update_physics() {
             bool any = false;
             for (int k = 0; k < brick_rows * brick_cols; ++k) { if (bricks[k].alive) { any = true; break; } }
             if (!any) {
-                // all bricks cleared: advance level, reset map and ball/paddle
-                level++;
-                init_bricks_for_level();
-                reset();
+                // all bricks cleared: mark level cleared and pause the game
+                mark_level_cleared();
                 return; // avoid overwriting ball position later in this tick
             }
             // otherwise just stop checking after this collision
@@ -215,10 +238,17 @@ void BrickBreaker::update_physics() {
     ball_y = next_y;
 
     if (ball_y + 2 >= HEIGHT) {
-           // bottom -> reset map and ball/paddle
-           // reinitialize bricks for the current level, then reset ball/paddle
-           init_bricks_for_level();
-           reset();
+           // ball fell off bottom -> lose a life
+           lives -= 1;
+           if (lives <= 0) {
+               // game over: stop updating ball/paddle until reset
+               game_over = true;
+               return;
+           } else {
+               // reset ball/paddle but keep current bricks and level
+               reset();
+               return;
+           }
     }
 }
 
